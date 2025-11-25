@@ -35,28 +35,22 @@ export async function getLatestSensorData(): Promise<SensorDataRow | null> {
   return data;
 }
 
-// --- FONCTION CORRIGÉE POUR L'HISTORIQUE ---
-
-// --- FONCTION CORRIGÉE POUR L'HISTORIQUE ---
-export async function getSensorHistory(days: number = 2) { // Par défaut 2 jours pour éviter trop de données
+export async function getSensorHistory(days: number = 1) {
   const date = new Date();
   date.setDate(date.getDate() - days);
 
-  // On limite artificiellement à 1000 points pour ne pas faire ramer l'affichage
-  // Cela suffit largement pour voir le tracé
   const { data, error } = await supabase
     .from('sensor_data')
     .select('latitude, longitude, created_at')
     .gte('created_at', date.toISOString())
-    .order('created_at', { ascending: false }) 
-    .limit(2000); 
+    .order('created_at', { ascending: false })
+    .limit(5000);
 
   if (error) {
     console.error('Error fetching history:', error);
     return [];
   }
-  
-  // On remet dans l'ordre chronologique (Ancien -> Récent) pour le tracé
+
   return data ? data.reverse() : [];
 }
 

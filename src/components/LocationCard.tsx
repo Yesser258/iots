@@ -19,7 +19,7 @@ export default function LocationCard({ latitude, longitude }: LocationCardProps)
     const toggleHistory = async () => {
         if (!showHistory) {
             setLoadingHistory(true);
-            const data = await getSensorHistory(7);
+            const data = await getSensorHistory(1);
             setHistoryData(data || []);
             setLoadingHistory(false);
         }
@@ -47,7 +47,7 @@ export default function LocationCard({ latitude, longitude }: LocationCardProps)
                         onClick={toggleHistory}
                         disabled={loadingHistory}
                         className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition text-sm font-medium disabled:opacity-50"
-                        title="View 7-day history"
+                        title="View 24-hour history"
                     >
                         <History className={`w-4 h-4 ${loadingHistory ? 'animate-spin' : ''}`} />
                         <span className="hidden sm:inline">History</span>

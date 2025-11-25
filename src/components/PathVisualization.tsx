@@ -140,7 +140,7 @@ export default function PathVisualization({ data = [], onClose }: PathVisualizat
             <div>
               <h2 className="text-xl font-bold text-gray-900">Travel History</h2>
               <p className="text-xs text-gray-500 flex items-center gap-1">
-                <Calendar className="w-3 h-3" /> Last 7 days
+                <Calendar className="w-3 h-3" /> Last 24 hours
               </p>
             </div>
           </div>

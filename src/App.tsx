@@ -8,7 +8,7 @@ import { getSimulatedData, type SensorData } from './data/staticData';
 import { getLatestSensorData, subscribeSensorData, type SensorDataRow, supabase } from './lib/supabase';
 import { AccidentDetectionService } from './lib/accidentDetection';
 
-// Helper: Calcule les angles d'inclinaison (Pitch/Roll) à partir de la gravité (Accéléromètre)
+// Helper: Calculate tilt angles (Pitch/Roll) from gravity (Accelerometer)
 function calculateOrientation(acc: { x: number; y: number; z: number }) {
   const pitchRad = Math.atan2(acc.y, acc.z);
   const rollRad = Math.atan2(-acc.x, Math.sqrt(acc.y * acc.y + acc.z * acc.z));
@@ -16,7 +16,7 @@ function calculateOrientation(acc: { x: number; y: number; z: number }) {
   return { x: toDeg(pitchRad), y: 0, z: toDeg(rollRad) };
 }
 
-// Helper: Filtre Passe-Bas pour lisser les données
+// Helper: Low-Pass Filter to smooth data
 function lowPassFilter(current: number, previous: number, alpha: number = 0.1) {
   return previous + alpha * (current - previous);
 }
@@ -61,7 +61,7 @@ function App() {
       setIsConnected(true);
       setLastUpdate(new Date(newData.created_at));
 
-      // Alimentation du service de détection
+      // Feed detection service
       detectionService.current.addReading(
         finalData.accelerometer.x, finalData.accelerometer.y, finalData.accelerometer.z,
         finalData.gyroscope.x, finalData.gyroscope.y, finalData.gyroscope.z
@@ -70,12 +70,12 @@ function App() {
       const result = detectionService.current.detectWithHistory();
       const zValue = finalData.accelerometer.z;
 
-      // --- LOGIQUE D'ACCIDENT SCOOTER ---
+      // --- SCOOTER ACCIDENT DETECTION LOGIC ---
       const isUpsideDown = zValue < -0.5;
       const isTippedOver = Math.abs(zValue) < 0.4; 
 
       if ((result.isAccident || isUpsideDown || isTippedOver) && !activeAccident && !isTriggered.current) {
-        console.log('ACCIDENT DÉTECTÉ (Impact, Retournement ou Chute)');
+        console.log('ACCIDENT DETECTED (Impact, Roll-over or Fall)');
         isTriggered.current = true;
         
         let finalDanger = result.dangerPercentage;
@@ -133,7 +133,7 @@ function App() {
 
       const { data: settings } = await supabase.from('user_settings').select('*').limit(1).maybeSingle();
 
-      // Envoi Telegram (même sans email)
+      // Send Telegram alert (even without email)
       if (settings) {
         await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-accident-alert`, {
           method: 'POST',
@@ -156,7 +156,7 @@ function App() {
         await sendEmergencyAlerts(accidentLog.id, settings, latitude, longitude, dangerPercentage);
       }, 30000);
     } catch (error) {
-      console.error('Erreur gestion accident:', error);
+      console.error('Accident handling error:', error);
     }
   };
 
@@ -212,20 +212,20 @@ function App() {
                 <Zap className="w-8 h-8 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Scooter Guardian</h1>
-                <p className="text-sm text-gray-600">Système de Sécurité & Tracking</p>
+                <h1 className="text-2xl font-bold text-gray-900">Rider Guardian</h1>
+                <p className="text-sm text-gray-600">Smart Scooter Safety System</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               {isConnected ? (
                 <>
                   <Wifi className="w-5 h-5 text-green-600" />
-                  <span className="text-sm font-medium text-green-600 hidden sm:inline">Connecté</span>
+                  <span className="text-sm font-medium text-green-600 hidden sm:inline">Connected</span>
                 </>
               ) : (
                 <>
                   <WifiOff className="w-5 h-5 text-red-600" />
-                  <span className="text-sm font-medium text-red-600 hidden sm:inline">Hors ligne</span>
+                  <span className="text-sm font-medium text-red-600 hidden sm:inline">Offline</span>
                 </>
               )}
             </div>
@@ -233,12 +233,11 @@ function App() {
         </div>
       </header>
 
-      {/* BANNIÈRE D'AVERTISSEMENT HORS LIGNE */}
       {!isConnected && (
         <div className="bg-red-500 text-white text-center py-2 font-bold animate-pulse shadow-md">
           <div className="flex items-center justify-center gap-2">
             <AlertOctagon className="w-5 h-5" />
-            <span>CONNEXION PERDUE : Le scooter ne transmet plus de données ! Vérifiez l'alimentation.</span>
+            <span>CONNECTION LOST: Scooter stopped transmitting data! Check power supply.</span>
           </div>
         </div>
       )}
@@ -252,11 +251,11 @@ function App() {
             timestamp={sensorData.timestamp}
           />
           <div className="bg-white rounded-lg shadow-lg p-4 flex flex-col">
-            <h2 className="text-xl font-semibold text-gray-800 mb-3">Orientation Scooter (Direct)</h2>
+            <h2 className="text-xl font-semibold text-gray-800 mb-3">Live Scooter Orientation</h2>
             <div className="flex-1 w-full">
               <HelmetVisualization rotation={calculateOrientation(sensorData.accelerometer)} />
             </div>
-            <div className="mt-3 text-xs text-gray-600 text-center">Visualisation temps réel</div>
+            <div className="mt-3 text-xs text-gray-600 text-center">Real-time visualization</div>
           </div>
         </div>
       </main>
