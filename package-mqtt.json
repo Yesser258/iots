@@ -1,0 +1,12 @@
+{
+  "name": "mqtt-subscriber",
+  "version": "1.0.0",
+  "description": "MQTT to Supabase bridge for ESP32 sensor data",
+  "main": "mqtt-subscriber.js",
+  "scripts": {
+    "start": "node mqtt-subscriber.js"
+  },
+  "dependencies": {
+    "mqtt": "^5.3.4"
+  }
+}
